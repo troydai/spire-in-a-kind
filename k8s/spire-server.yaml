@@ -1,0 +1,135 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: spire
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spire-server-config
+  namespace: spire
+data:
+  server.conf: |
+    server {
+      trust_domain = "spire-in-a-box.troydai.cc"
+      bind_address = "0.0.0.0"
+      bind_port = "8081"
+      log_level = "DEBUG"
+      data_dir = "/opt/spire/.data/"
+      default_x509_svid_ttl = "6h"
+      default_jwt_svid_ttl = "5m"
+      ca_ttl = "72h"
+      ca_subject {
+        country = ["US"]
+        organization = ["TROYDAI-FRIENDS-AND-FAMILY"]
+        common_name = "TDFF-CA"
+      }
+    }
+
+    plugins {
+      DataStore "sql" {
+        plugin_data {
+          database_type = "sqlite3"
+          connection_string = "/opt/spire/.data/datastore.sqlite3"
+        }
+      }
+
+      KeyManager "memory" {
+        plugin_data {}
+      }
+
+      UpstreamAuthority "disk" {
+        plugin_data {
+          key_file_path = "./conf/server/root.key.pem"
+          cert_file_path = "./conf/server/root.crt.pem"
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spire-server-root-cert
+  namespace: spire
+data:
+  root.crt.pem: |
+    -----BEGIN CERTIFICATE-----
+    MIICOTCCAZsCCQC6ctfkb+2q3jAKBggqhkjOPQQDAjBhMSIwIAYDVQQDDBlzcGly
+    ZS1pbi1hLWJveC50cm95ZGFpLmNjMQswCQYDVQQGEwJVUzELMAkGA1UECAwCV0Ex
+    EDAOBgNVBAcMB1JlZG1vbmQxDzANBgNVBAoMBlRERlVORDAeFw0yMzA0MDIyMzAz
+    MTZaFw0zMzAzMzAyMzAzMTZaMGExIjAgBgNVBAMMGXNwaXJlLWluLWEtYm94LnRy
+    b3lkYWkuY2MxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJXQTEQMA4GA1UEBwwHUmVk
+    bW9uZDEPMA0GA1UECgwGVERGVU5EMIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQB
+    mGUNv+4R6/hG9Zml7n+21s198zbaPIRhMgHlWxXuC6HHhYt4T+89jaaA3W7mjsjK
+    M3Pw2Ec4A70I3uAyYa5NrIQAT4L3ZZ6p5dPwD/utqqrwqmFhJUKNOVgqoTqjyL2r
+    Z4hpzb9I+/+rLBCPhzELS21hdicH4X7g5RGwTW4Yl5JMUMIwCgYIKoZIzj0EAwID
+    gYsAMIGHAkE9SjmIZ8si+s5nAFRBNIqKSYEnF+MfF70c04H4BgjN7MAPcuXRQ/lJ
+    qffI+WEWHaixnWFzTpEIKqGZEOs4nzvMowJCAbAhueOiP7trJoQvD0Er1VUVIfwn
+    YwrfbY9oCe3JTu/YpEtheI5+JFJmaPDyhUGHZ4vFSJSZeCXFcps4jNNNM1j3
+    -----END CERTIFICATE-----
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: spire-server-root-key
+  namespace: spire
+type: Opaque
+data:
+  root.key.pem: LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1JSGNBZ0VCQkVJQkc4YUFHYW9OdTJoeHFVN2ZOa0tFblI3dTNFVm1TOVhxTlUwd2NKM2xDMitzNkRnbkZJbWgKQWlSQUtBNE9lK2VreDl6UVNSRDVFM29VcU9DN1pNWG5kcm1nQndZRks0RUVBQ09oZ1lrRGdZWUFCQUdZWlEyLwo3aEhyK0ViMW1hWHVmN2JXelgzek50bzhoR0V5QWVWYkZlNExvY2VGaTNoUDd6Mk5wb0RkYnVhT3lNb3pjL0RZClJ6Z0R2UWplNERKaHJrMnNoQUJQZ3ZkbG5xbmwwL0FQKzYycXF2Q3FZV0VsUW8wNVdDcWhPcVBJdmF0bmlHbk4KdjBqNy82c3NFSStITVF0TGJXRjJKd2ZoZnVEbEViQk5iaGlYa2t4UXdnPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spire-server-deployment
+  namespace: spire
+  labels:
+    app: spire-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spire-server
+  template:
+    metadata:
+      labels:
+        app: spire-server
+    spec:
+      containers:
+      - name: spire-server
+        image: ghcr.io/spiffe/spire-server:1.6.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+        volumeMounts:
+        - name: server-conf
+          mountPath: /opt/spire/conf/server
+          readOnly: true
+        - name: server-data
+          mountPath: /opt/spire/.data
+          readOnly: false
+      volumes:
+      - name: server-conf
+        projected:
+          sources:
+            - secret:
+                name: spire-server-root-key
+            - configMap:
+                name: spire-server-root-cert
+            - configMap:
+                name: spire-server-config
+      - name: server-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spire-server-service
+  labels:
+    app: spire-server
+spec:
+  selector:
+    app: spire-server
+  ports:
+  - protocol: TCP
+    port: 8081
+    targetPort: 8081
