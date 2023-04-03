@@ -16,7 +16,7 @@ data:
       bind_port = "8081"
       log_level = "DEBUG"
       data_dir = "/opt/spire/.data/"
-      default_x509_svid_ttl = "6h"
+      default_x509_svid_ttl = "2h"
       default_jwt_svid_ttl = "5m"
       ca_ttl = "72h"
       ca_subject {
@@ -38,12 +38,30 @@ data:
         plugin_data {}
       }
 
+      NodeAttestor "k8s_psat" {
+        plugin_data {
+          clusters = {
+            "kind-cluster" = {
+              service_account_allow_list = ["spire:spire-agent"]
+            }
+          }
+        }
+      }
+
       UpstreamAuthority "disk" {
         plugin_data {
           key_file_path = "./conf/server/root.key.pem"
           cert_file_path = "./conf/server/root.crt.pem"
         }
       }
+    }
+
+    health_checks {
+      listener_enabled = true
+      bind_address = "0.0.0.0"
+      bind_port = "8080"
+      live_path = "/live"
+      ready_path = "/ready"
     }
 ---
 apiVersion: v1
@@ -77,6 +95,39 @@ type: Opaque
 data:
   root.key.pem: LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1JSGNBZ0VCQkVJQkc4YUFHYW9OdTJoeHFVN2ZOa0tFblI3dTNFVm1TOVhxTlUwd2NKM2xDMitzNkRnbkZJbWgKQWlSQUtBNE9lK2VreDl6UVNSRDVFM29VcU9DN1pNWG5kcm1nQndZRks0RUVBQ09oZ1lrRGdZWUFCQUdZWlEyLwo3aEhyK0ViMW1hWHVmN2JXelgzek50bzhoR0V5QWVWYkZlNExvY2VGaTNoUDd6Mk5wb0RkYnVhT3lNb3pjL0RZClJ6Z0R2UWplNERKaHJrMnNoQUJQZ3ZkbG5xbmwwL0FQKzYycXF2Q3FZV0VsUW8wNVdDcWhPcVBJdmF0bmlHbk4KdjBqNy82c3NFSStITVF0TGJXRjJKd2ZoZnVEbEViQk5iaGlYa2t4UXdnPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spire-agent
+  namespace: spire
+---
+# Required cluster role to allow spire-server to query k8s API server
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: spire-server-cluster-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "nodes"]
+  verbs: ["get"]
+- apiGroups: ["authentication.k8s.io"]
+  resources: ["tokenreviews"]
+  verbs: ["create"]
+---
+# Binds above cluster role to spire-server service account
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: spire-server-cluster-role-binding
+subjects:
+- kind: ServiceAccount
+  name: spire-agent
+  namespace: spire
+roleRef:
+  kind: ClusterRole
+  name: spire-server-cluster-role
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -94,10 +145,10 @@ spec:
       labels:
         app: spire-server
     spec:
+      serviceAccountName: spire-agent
       containers:
       - name: spire-server
         image: ghcr.io/spiffe/spire-server:1.6.1
-        imagePullPolicy: Always
         ports:
         - containerPort: 8081
         volumeMounts:
@@ -107,6 +158,20 @@ spec:
         - name: server-data
           mountPath: /opt/spire/.data
           readOnly: false
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: 8080
+          failureThreshold: 2
+          initialDelaySeconds: 15
+          periodSeconds: 60
+          timeoutSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
       volumes:
       - name: server-conf
         projected:
@@ -124,9 +189,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: spire-server-service
+  namespace: spire
   labels:
     app: spire-server
 spec:
+  type: NodePort
   selector:
     app: spire-server
   ports:
