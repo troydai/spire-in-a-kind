@@ -40,7 +40,7 @@ data:
       log_level = "DEBUG"
       server_address = "spire-server-service"
       server_port = "8081"
-      socket_path ="/tmp/spire-agent/public/api.sock"
+      socket_path ="/run/spire/sockets/spire-agent.sock"
       trust_bundle_path = "./conf/agent/root.crt.pem"
       trust_domain = "spire-in-a-box.troydai.cc"
     }
@@ -94,12 +94,12 @@ spec:
           volumeMounts:
             - name: spire-agent-config
               mountPath: /opt/spire/conf/agent
-            - name: spire-agent-socket
-              mountPath: /tmp/spire-agent
             - name: spire-agent-data
               mountPath: /opt/spire/.data
             - name: spire-token
               mountPath: /var/run/secrets/tokens
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
       volumes:
         - name: spire-agent-config
           projected:
@@ -109,7 +109,9 @@ spec:
               - configMap:
                   name: spire-agent-config
         - name: spire-agent-socket
-          emptyDir: {}
+          hostPath:
+            path: /run/spire/agent-sockets
+            type: DirectoryOrCreate
         - name: spire-agent-data
           emptyDir: {}
         - name: spire-token

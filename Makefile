@@ -6,9 +6,13 @@ up:
 	@ kubectl cluster-info --context kind-spireiak
 	@ kubectl apply -f k8s/spire-server.yaml
 	@ kubectl apply -f k8s/spire-agent.yaml
+	@ kubectl apply -f k8s/spiffe-csi-driver.yaml
+	@ kubectl apply -f k8s/workloads.yaml
 
 down:
 	@ kubectl cluster-info --context kind-spireiak
+	@ kubectl delete -f k8s/workloads.yaml
+	@ kubectl delete -f k8s/spiffe-csi-driver.yaml
 	@ kubectl delete -f k8s/spire-agent.yaml
 	@ kubectl delete -f k8s/spire-server.yaml
 
