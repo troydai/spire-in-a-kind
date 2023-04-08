@@ -7,27 +7,90 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx
+  name: beacon-deployment
   namespace: workload-ns
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nginx
+      app: beacon
   template:
     metadata:
       labels:
-        app: nginx
+        app: beacon
     spec:
       containers:
-      - name: nginx
-        image: nginx:1.7.9
+      - name: beacon
+        image: troydai/grpcbeacon:v0.8.0
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: spiffe-workload-api
+          mountPath: /opt/spire/sockets
+          readOnly: true
+      volumes:
+        - name: spiffe-workload-api
+          csi:
+            driver: "csi.spiffe.io"
+            readOnly: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: beacon-service
+  namespace: workload-ns
+spec:
+  selector:
+    app: beacon
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prober-config
+  namespace: workload-ns
+data:
+  beacon_addr: "beacon-service:8080"
+  prober_interval: "30s"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prober-deployment
+  namespace: workload-ns
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: prober
+  template:
+    metadata:
+      labels:
+        app: prober
+    spec:
+      containers:
+      - name: prober
+        image: troydai/grpcprober:v0.8.0
         ports:
         - containerPort: 80
         volumeMounts:
         - name: spiffe-workload-api
           mountPath: /opt/spire/sockets
           readOnly: true
+        env:
+        - name: SERVER_ADDRESS
+          valueFrom:
+            configMapKeyRef:
+              name: prober-config
+              key: beacon_addr
+        - name: CLIENT_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: prober-config
+              key: prober_interval
       volumes:
         - name: spiffe-workload-api
           csi:
