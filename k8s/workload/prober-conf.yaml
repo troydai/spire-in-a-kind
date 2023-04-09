@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prober-config
+  namespace: workload-ns
+data:
+  beacon_addr: "beacon-service:9090"
+  prober_interval: "10s"

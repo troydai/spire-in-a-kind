@@ -1,9 +1,4 @@
 ---
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: workload-ns
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,8 +15,16 @@ spec:
         app: beacon
     spec:
       containers:
+      - name: envoy
+        image: envoyproxy/envoy:v1.25.1
+        ports:
+        - containerPort: 9090
+        volumeMounts:
+        - name: envoy-conifg
+          mountPath: /etc/envoy
+          readOnly: true
       - name: beacon
-        image: troydai/grpcbeacon:v0.8.0
+        image: troydai/grpcbeacon:v0.8.2
         ports:
         - containerPort: 8080
         volumeMounts:
@@ -33,28 +36,12 @@ spec:
           csi:
             driver: "csi.spiffe.io"
             readOnly: true
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: beacon-service
-  namespace: workload-ns
-spec:
-  selector:
-    app: beacon
-  ports:
-  - protocol: TCP
-    port: 8080
-    targetPort: 8080
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: prober-config
-  namespace: workload-ns
-data:
-  beacon_addr: "beacon-service:8080"
-  prober_interval: "30s"
+        - name: envoy-conifg
+          configMap:
+            name: beacon-config
+            items:
+            - key: envoy-config
+              path: envoy.yaml
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -73,7 +60,7 @@ spec:
     spec:
       containers:
       - name: prober
-        image: troydai/grpcprober:v0.8.0
+        image: troydai/grpcprober:v0.8.2
         ports:
         - containerPort: 80
         volumeMounts:
