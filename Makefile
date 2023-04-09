@@ -24,3 +24,9 @@ workload-up:
 
 workload-down:
 	@ kubectl delete -f k8s/workload
+
+log-prober:
+	@ kubectl logs -f -n workload-ns deployment/prober-deployment -c prober
+
+log-beacon:
+	@ kubectl logs -f -n workload-ns deployment/beacon-deployment -c beacon

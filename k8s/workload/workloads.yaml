@@ -25,8 +25,6 @@ spec:
           readOnly: true
       - name: beacon
         image: troydai/grpcbeacon:v0.8.2
-        ports:
-        - containerPort: 8080
         volumeMounts:
         - name: spiffe-workload-api
           mountPath: /opt/spire/sockets
@@ -59,10 +57,14 @@ spec:
         app: prober
     spec:
       containers:
+      - name: envoy
+        image: envoyproxy/envoy:v1.25.1
+        volumeMounts:
+        - name: envoy-config
+          mountPath: /etc/envoy
+          readOnly: true
       - name: prober
         image: troydai/grpcprober:v0.8.2
-        ports:
-        - containerPort: 80
         volumeMounts:
         - name: spiffe-workload-api
           mountPath: /opt/spire/sockets
@@ -79,6 +81,12 @@ spec:
               name: prober-config
               key: prober_interval
       volumes:
+        - name: envoy-config
+          configMap:
+            name: prober-config
+            items:
+            - key: envoy-config
+              path: envoy.yaml
         - name: spiffe-workload-api
           csi:
             driver: "csi.spiffe.io"
