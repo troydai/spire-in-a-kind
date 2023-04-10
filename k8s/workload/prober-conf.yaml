@@ -8,6 +8,10 @@ data:
   beacon_addr: "localhost:7000"
   prober_interval: "10s"
   envoy-config: |
+    node:
+      id: default
+      cluster: kind-cluster
+
     static_resources:
       listeners:
       - name: listener_0
@@ -54,3 +58,44 @@ data:
                   socket_address:
                     address: beacon-service
                     port_value: 9090
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              tls_certificate_sds_secret_configs:
+                - name: "spiffe://spire-in-a-box.troydai.cc/wl/prober"
+                  sds_config:
+                    api_config_source:
+                      api_type: GRPC
+                      transport_api_version: V3
+                      grpc_services:
+                        envoy_grpc:
+                          cluster_name: spire_agent
+              combined_validation_context:
+                default_validation_context:
+                  match_subject_alt_names:
+                    exact: "spiffe://spire-in-a-box.troydai.cc/wl/beacon"
+                validation_context_sds_secret_config:
+                  name: "spiffe://spire-in-a-box.troydai.cc"
+                  sds_config:
+                    api_config_source:
+                      api_type: GRPC
+                      transport_api_version: V3
+                      grpc_services:
+                        envoy_grpc:
+                          cluster_name: spire_agent
+              tls_params:
+                ecdh_curves:
+                  - X25519:P-256:P-521:P-384
+      - name: spire_agent
+        connect_timeout: 0.25s
+        http2_protocol_options: {}
+        load_assignment:
+          cluster_name: spire_agent
+          endpoints:
+            - lb_endpoints:
+                - endpoint:
+                    address:
+                      pipe:
+                        path: /opt/spire/sockets/spire-agent.sock

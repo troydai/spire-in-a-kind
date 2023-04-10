@@ -28,6 +28,9 @@ spec:
         - name: envoy-config
           mountPath: /etc/envoy
           readOnly: true
+        - name: spiffe-workload-api
+          mountPath: /opt/spire/sockets
+          readOnly: true
       - name: prober
         image: troydai/grpcprober:v0.8.2
         volumeMounts:
@@ -45,12 +48,12 @@ spec:
             configMapKeyRef:
               name: prober-config
               key: prober_interval
-      - name: toolbox
-        image: troydai/spire-toolbox:v0.1.0
-        volumeMounts:
-        - name: spiffe-workload-api
-          mountPath: /opt/spire/sockets
-          readOnly: true
+      # - name: toolbox
+      #   image: troydai/spire-toolbox:v0.1.0
+      #   volumeMounts:
+      #   - name: spiffe-workload-api
+      #     mountPath: /opt/spire/sockets
+      #     readOnly: true
       volumes:
         - name: envoy-config
           configMap:
