@@ -34,7 +34,7 @@ spec:
           mountPath: /opt/spire/sockets
           readOnly: true
       - name: beacon
-        image: troydai/grpcbeacon:v0.8.2
+        image: troydai/grpcbeacon:v0.8.4
         volumeMounts:
         - name: spiffe-workload-api
           mountPath: /opt/spire/sockets
