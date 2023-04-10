@@ -83,6 +83,9 @@ spec:
       labels:
         app: spire-agent
     spec:
+      hostPID: true
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: spire-agent
       initContainers:
         - name: init

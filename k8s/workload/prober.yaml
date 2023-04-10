@@ -1,45 +1,9 @@
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: ServiceAccount
 metadata:
-  name: beacon-deployment
+  name: prober-sa
   namespace: workload-ns
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: beacon
-  template:
-    metadata:
-      labels:
-        app: beacon
-    spec:
-      containers:
-      - name: envoy
-        image: envoyproxy/envoy:v1.25.1
-        ports:
-        - containerPort: 9090
-        volumeMounts:
-        - name: envoy-conifg
-          mountPath: /etc/envoy
-          readOnly: true
-      - name: beacon
-        image: troydai/grpcbeacon:v0.8.2
-        volumeMounts:
-        - name: spiffe-workload-api
-          mountPath: /opt/spire/sockets
-          readOnly: true
-      volumes:
-        - name: spiffe-workload-api
-          csi:
-            driver: "csi.spiffe.io"
-            readOnly: true
-        - name: envoy-conifg
-          configMap:
-            name: beacon-config
-            items:
-            - key: envoy-config
-              path: envoy.yaml
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -47,7 +11,7 @@ metadata:
   name: prober-deployment
   namespace: workload-ns
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: prober
@@ -56,6 +20,7 @@ spec:
       labels:
         app: prober
     spec:
+      serviceAccountName: prober-sa
       containers:
       - name: envoy
         image: envoyproxy/envoy:v1.25.1
@@ -80,6 +45,12 @@ spec:
             configMapKeyRef:
               name: prober-config
               key: prober_interval
+      - name: toolbox
+        image: troydai/spire-toolbox:v0.1.0
+        volumeMounts:
+        - name: spiffe-workload-api
+          mountPath: /opt/spire/sockets
+          readOnly: true
       volumes:
         - name: envoy-config
           configMap:
