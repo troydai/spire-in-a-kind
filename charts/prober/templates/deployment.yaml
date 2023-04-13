@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prober-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: prober
+  template:
+    metadata:
+      labels:
+        app: prober
+    spec:
+      serviceAccountName: prober-sa
+      containers:
+      - name: envoy
+        image: envoyproxy/envoy:v1.25.1
+        volumeMounts:
+        - name: envoy-config
+          mountPath: /etc/envoy
+          readOnly: true
+        - name: spiffe-workload-api
+          mountPath: /opt/spire/sockets
+          readOnly: true
+      - name: prober
+        image: {{ .Values.images.prober }}
+        volumeMounts:
+        - name: spiffe-workload-api
+          mountPath: /opt/spire/sockets
+          readOnly: true
+        env:
+        - name: SERVER_ADDRESS
+          valueFrom:
+            configMapKeyRef:
+              name: prober-config
+              key: beacon_addr
+        - name: CLIENT_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: prober-config
+              key: prober_interval
+
+      volumes:
+        - name: envoy-config
+          configMap:
+            name: prober-config
+            items:
+            - key: envoy-config
+              path: envoy.yaml
+        - name: spiffe-workload-api
+          csi:
+            driver: "csi.spiffe.io"
+            readOnly: true

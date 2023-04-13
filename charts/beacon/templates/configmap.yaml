@@ -92,7 +92,7 @@ data:
                       address:
                         socket_address:
                           address: 127.0.0.1
-                          port_value: {{ .Values.service.servicePort }}
+                          port_value: {{ .Values.service.beaconPort }}
         - name: spire_agent
           connect_timeout: 0.25s
           http2_protocol_options: {}
