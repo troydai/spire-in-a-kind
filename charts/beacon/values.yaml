@@ -1,0 +1,19 @@
+clusterName: kind-cluster
+
+service:
+  servicePort: 9090
+  envoyPort: 9090
+  beaconPort: 8080
+
+spiffe:
+  trustDomain: spire-in-a-box.troydai.cc
+  idPath: /wl/beacon
+
+authorization:
+  allowedExact:
+    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/alice/prober"
+    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/bob/prober"
+
+images:
+  beacon: troydai/grpcbeacon:v0.8.4
+  envoy: envoyproxy/envoy:v1.25.1

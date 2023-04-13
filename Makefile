@@ -30,3 +30,6 @@ log-prober:
 
 log-beacon:
 	@ kubectl logs -f -n workload-ns deployment/beacon-deployment -c beacon
+
+helm-uninstall-all:
+	@ helm ls -A | awk '{print $$1}' | xargs -L1 helm uninstall

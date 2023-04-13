@@ -23,7 +23,7 @@ kubectl exec -n spire -c spire-server deployment/spire-server-deployment -- /opt
     entry create \
     -spiffeID spiffe://$TRUST_DOMAIN/wl/beacon \
     -parentID spiffe://$TRUST_DOMAIN/ns/spire/sa/spire-agent \
-    -selector k8s:ns:workload-ns \
+    -selector k8s:ns:beacon-one \
     -selector k8s:sa:beacon-sa
 
 kubectl exec -n spire -c spire-server deployment/spire-server-deployment -- /opt/spire/bin/spire-server \
@@ -31,4 +31,18 @@ kubectl exec -n spire -c spire-server deployment/spire-server-deployment -- /opt
     -spiffeID spiffe://$TRUST_DOMAIN/wl/prober \
     -parentID spiffe://$TRUST_DOMAIN/ns/spire/sa/spire-agent \
     -selector k8s:ns:workload-ns \
+    -selector k8s:sa:prober-sa
+
+kubectl exec -n spire -c spire-server deployment/spire-server-deployment -- /opt/spire/bin/spire-server \
+    entry create \
+    -spiffeID spiffe://$TRUST_DOMAIN/wl/ns/bob/prober \
+    -parentID spiffe://$TRUST_DOMAIN/ns/spire/sa/spire-agent \
+    -selector k8s:ns:bob \
+    -selector k8s:sa:prober-sa
+
+kubectl exec -n spire -c spire-server deployment/spire-server-deployment -- /opt/spire/bin/spire-server \
+    entry create \
+    -spiffeID spiffe://$TRUST_DOMAIN/wl/ns/alice/prober \
+    -parentID spiffe://$TRUST_DOMAIN/ns/spire/sa/spire-agent \
+    -selector k8s:ns:alice \
     -selector k8s:sa:prober-sa

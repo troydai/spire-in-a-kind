@@ -1,19 +1,21 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: beacon-config
-  namespace: workload-ns
+  name: beacon-configmap
+  namespace: {{ .Release.Namespace }}
 data:
   envoy-config: |
     node:
       id: default
-      cluster: kind-cluster
+      cluster: {{ .Values.clusterName }}
 
     static_resources:
       listeners:
         - name: listener_0
           address:
-            socket_address: { address: 0.0.0.0, port_value: 9090 }
+            socket_address:
+              address: 0.0.0.0
+              port_value: {{ .Values.service.envoyPort }}
           filter_chains:
             - filters:
                 - name: envoy.filters.network.http_connection_manager
@@ -44,14 +46,14 @@ data:
                                 prefix: "/grpcbeacon.Beacon"
                                 grpc: {}
                               route:
-                                cluster: beacon
+                                cluster: local
               transport_socket:
                 name: envoy.transport_sockets.tls
                 typed_config:
                   "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
                   common_tls_context:
                     tls_certificate_sds_secret_configs:
-                      - name: "spiffe://spire-in-a-box.troydai.cc/wl/beacon"
+                      - name: "spiffe://{{ .Values.spiffe.trustDomain }}{{ .Values.spiffe.idPath }}"
                         sds_config:
                           api_config_source:
                             api_type: gRPC
@@ -62,11 +64,11 @@ data:
                     combined_validation_context:
                       default_validation_context:
                         match_subject_alt_names:
-                          - exact: "spiffe://spire-in-a-box.troydai.cc/wl/prober"
-                          - exact: "spiffe://spire-in-a-box.troydai.cc/wl/ns/alice/prober"
-                          - exact: "spiffe://spire-in-a-box.troydai.cc/wl/ns/bob/prober"
+                        {{- range .Values.authorization.allowedExact }}
+                          - exact: {{ quote . }}
+                        {{- end}}
                       validation_context_sds_secret_config:
-                        name: "spiffe://spire-in-a-box.troydai.cc"
+                        name: "spiffe://{{ .Values.spiffe.trustDomain }}"
                         sds_config:
                           api_config_source:
                             api_type: gRPC
@@ -78,19 +80,19 @@ data:
                       ecdh_curves:
                         - X25519:P-256:P-521:P-384
       clusters:
-        - name: beacon
+        - name: local
           type: STATIC
           dns_lookup_family: V4_ONLY
           http2_protocol_options: {}
           load_assignment:
-            cluster_name: beacon
+            cluster_name: local
             endpoints:
               - lb_endpoints:
                   - endpoint:
                       address:
                         socket_address:
                           address: 127.0.0.1
-                          port_value: 8080
+                          port_value: {{ .Values.service.servicePort }}
         - name: spire_agent
           connect_timeout: 0.25s
           http2_protocol_options: {}
