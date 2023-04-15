@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spire-server-config
+  namespace: {{ .Release.Namespace }}
+data:
+  server.conf: |
+    server {
+      trust_domain = {{ quote .Values.spiffe.trustDomain }}
+      bind_address = "0.0.0.0"
+      bind_port = "8081"
+      log_level = "DEBUG"
+      data_dir = "/opt/spire/.data/"
+      default_x509_svid_ttl = "2h"
+      default_jwt_svid_ttl = "5m"
+      ca_ttl = "72h"
+      ca_subject {
+        country = ["US"]
+        organization = ["TROYDAI-FRIENDS-AND-FAMILY"]
+        common_name = "TDFF-CA"
+      }
+    }
+
+    plugins {
+      DataStore "sql" {
+        plugin_data {
+          database_type = "sqlite3"
+          connection_string = "/opt/spire/.data/datastore.sqlite3"
+        }
+      }
+
+      KeyManager "memory" {
+        plugin_data {}
+      }
+
+      NodeAttestor "k8s_psat" {
+        plugin_data {
+          clusters = {
+            {{ quote .Values.cluster.name }} = {
+              service_account_allow_list = ["{{ .Release.Namespace }}:spire-agent"]
+            }
+          }
+        }
+      }
+
+      UpstreamAuthority "disk" {
+        plugin_data {
+          key_file_path = "/etc/spire/conf/server/root.key.pem"
+          cert_file_path = "/etc/spire/conf/server/root.crt.pem"
+        }
+      }
+    }
+
+    health_checks {
+      listener_enabled = true
+      bind_address = "0.0.0.0"
+      bind_port = "8080"
+      live_path = "/live"
+      ready_path = "/ready"
+    }

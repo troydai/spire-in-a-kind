@@ -1,0 +1,8 @@
+spiffe:
+  trustDomain: "spire-in-a-box.troydai.cc"
+
+cluster:
+  name: kind-cluster
+
+servicePod:
+  enable: false

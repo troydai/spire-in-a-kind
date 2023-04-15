@@ -1,0 +1,25 @@
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   name: spire-service-pod
+#   namespace: {{ .Release.Namespace }}
+# spec:
+#   serviceAccountName: spire-server
+#   containers:
+#     - name: service-pod
+#       image: busybox:1.36
+#       command: ["sleep", "infinity"]
+#       volumeMounts:
+#         - name: server-conf
+#           mountPath: /etc/spire/conf/server
+#           readOnly: true
+#   volumes:
+#     - name: server-conf
+#       projected:
+#         sources:
+#           - configMap:
+#               name: spire-server-config
+#           - configMap:
+#               name: spire-server-root-cert
+#           - secret:
+#               name: spire-server-root-key

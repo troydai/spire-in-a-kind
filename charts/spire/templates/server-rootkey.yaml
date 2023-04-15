@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: spire-server-root-key
+  namespace: {{ .Release.Namespace }}
+type: Opaque
+data:
+  root.key.pem: {{ .Files.Get "ca/root.key.pem" | b64enc }}

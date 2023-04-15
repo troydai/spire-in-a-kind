@@ -1,0 +1,6 @@
+apiVersion: v2
+name: spire
+description: Spire server and agent
+type: application
+version: 0.1.3
+appVersion: "1.16.0"

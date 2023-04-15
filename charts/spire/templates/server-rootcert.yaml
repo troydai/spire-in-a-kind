@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spire-server-root-cert
+  namespace: {{ .Release.Namespace }}
+data:
+  root.crt.pem: | {{ range .Files.Lines "ca/root.crt.pem" }}
+    {{ . }}
+    {{- end }}

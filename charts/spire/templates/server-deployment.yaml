@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spire-server-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spire-server
+  template:
+    metadata:
+      labels:
+        app: spire-server
+    spec:
+      serviceAccountName: spire-server
+      containers:
+        - name: spire-server
+          image: ghcr.io/spiffe/spire-server:1.6.1
+          args:
+            - -config
+            - /etc/spire/conf/server/server.conf
+          volumeMounts:
+            - name: server-conf
+              mountPath: /etc/spire/conf/server
+              readOnly: true
+            - name: server-data
+              mountPath: /opt/spire/.data
+              readOnly: false
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: 8080
+            failureThreshold: 2
+            initialDelaySeconds: 15
+            periodSeconds: 60
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: server-conf
+          projected:
+            sources:
+              - configMap:
+                  name: spire-server-config
+              - configMap:
+                  name: spire-server-root-cert
+              - secret:
+                  name: spire-server-root-key
+        - name: server-data
+          emptyDir: {}
