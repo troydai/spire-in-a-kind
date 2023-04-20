@@ -1,6 +1,6 @@
 apiVersion: v2
 name: beacon
-description: A Helm chart for grpcbeacon
+description: A Helm chart for Beacon
 type: application
-version: 0.1.0
+version: 0.3.0
 appVersion: "1.16.0"

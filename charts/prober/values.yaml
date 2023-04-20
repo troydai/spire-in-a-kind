@@ -1,11 +1,9 @@
-# Default values for grpcbeacon-prober.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 replicaCount: 1
 
 images:
-  prober: troydai/grpcprober:v0.8.4
+  prober: ghcr.io/troydai/grpcprober:v0.13.0
+  toolbox: ghcr.io/troydai/beacon-toolbox:v0.13.0
+  envoy: envoyproxy/envoy:v1.25.1
 
 spiffe:
   trustDomain: spire-in-a-box.troydai.cc
