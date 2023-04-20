@@ -6,12 +6,13 @@ SPIRE_NAMESPACE=spire
 cluster-up: cluster/kind-config.yaml
 	@ kind create cluster --name ${CLUSTER_NAME} --config cluster/kind-config.yaml
 	@ helm install -g ./charts/prerequisites
+	@ ./scripts/entry/create.sh
 
 cluster-down:
 	kind delete cluster --name ${CLUSTER_NAME}
 
 beacon-up:
-	@ helm install -n beacon --create-namespace -g charts/beacon
+	@ helm install -n beacon --create-namespace -g charts/beacon --wait
 
 beacon-down:
 	@ helm list -n beacon -ojson | jq -r '.[] | .name' | xargs helm uninstall -n beacon
@@ -29,10 +30,12 @@ beacon-log-proxy:
 prober-up:
 	@ helm install -n alice --create-namespace -g charts/prober
 	@ helm install -n bob --create-namespace -g charts/prober
+	@ helm install -n charlie --create-namespace -g charts/prober
 
 prober-down:
 	@ helm list -n alice -ojson | jq -r '.[] | .name' | xargs helm uninstall -n alice
 	@ helm list -n bob -ojson | jq -r '.[] | .name' | xargs helm uninstall -n bob
+	@ helm list -n charlie -ojson | jq -r '.[] | .name' | xargs helm uninstall -n charlie
 
 prober-log:
 	@ kubectl get pod -nalice -ojson | \

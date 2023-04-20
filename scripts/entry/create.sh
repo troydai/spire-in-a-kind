@@ -39,3 +39,10 @@ kubectl exec -n spire -c spire-server deployment/spire-server-deployment -- /opt
     -parentID spiffe://$TRUST_DOMAIN/ns/spire/sa/spire-agent \
     -selector k8s:ns:bob \
     -selector k8s:sa:prober-sa
+
+kubectl exec -n spire -c spire-server deployment/spire-server-deployment -- /opt/spire/bin/spire-server \
+    entry create \
+    -spiffeID spiffe://$TRUST_DOMAIN/wl/ns/charlie/prober \
+    -parentID spiffe://$TRUST_DOMAIN/ns/spire/sa/spire-agent \
+    -selector k8s:ns:charlie \
+    -selector k8s:sa:prober-sa

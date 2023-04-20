@@ -7,7 +7,11 @@ spec:
   selector:
     app: beacon
   ports:
-  - name: beacon-envoy
-    protocol: TCP
-    port: {{ .Values.service.servicePort }}
-    targetPort: {{ .Values.service.envoyPort }}
+    - name: beacon-envoy
+      protocol: TCP
+      port: {{ .Values.service.envoyPort }}
+      targetPort: {{ .Values.service.envoyPort }}
+    - name: beacon-envoy-unauth
+      protocol: TCP
+      port: {{ .Values.service.envoyPortUnauth }}
+      targetPort: {{ .Values.service.envoyPortUnauth }}

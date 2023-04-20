@@ -15,23 +15,21 @@ spec:
     spec:
       serviceAccountName: beacon-sa
       containers:
-      - name: envoy
-        image: {{ .Values.images.envoy }}
-        ports:
-        - containerPort: {{ .Values.service.envoyPort }}
-        volumeMounts:
-        - name: envoy-conifg
-          mountPath: /etc/envoy
-          readOnly: true
-        - name: spiffe-workload-api
-          mountPath: /opt/spire/sockets
-          readOnly: true
-      - name: beacon
-        image: {{ .Values.images.beacon }}
-        volumeMounts:
-        - name: spiffe-workload-api
-          mountPath: /opt/spire/sockets
-          readOnly: true
+        - name: beacon
+          image: {{ .Values.images.beacon }}
+        - name: toolbox
+          image: {{ .Values.images.toolbox }}
+        - name: envoy
+          image: {{ .Values.images.envoy }}
+          ports:
+            - containerPort: {{ .Values.service.envoyPort }}
+          volumeMounts:
+            - name: envoy-conifg
+              mountPath: /etc/envoy
+              readOnly: true
+            - name: spiffe-workload-api
+              mountPath: /opt/spire/sockets
+              readOnly: true
       volumes:
         - name: spiffe-workload-api
           csi:
@@ -41,5 +39,5 @@ spec:
           configMap:
             name: beacon-configmap
             items:
-            - key: envoy-config
-              path: envoy.yaml
+              - key: envoy-config
+                path: envoy.yaml

@@ -1,8 +1,13 @@
 clusterName: kind-cluster
 
+images:
+  beacon: ghcr.io/troydai/grpcbeacon:v0.13.0
+  toolbox: ghcr.io/troydai/beacon-toolbox:v0.13.0
+  envoy: envoyproxy/envoy:v1.25.1
+
 service:
-  servicePort: 9090
   envoyPort: 9090
+  envoyPortUnauth: 9091
   beaconPort: 8080
 
 spiffe:
@@ -13,7 +18,3 @@ authorization:
   allowedExact:
     - "spiffe://spire-in-a-box.troydai.cc/wl/ns/alice/prober"
     - "spiffe://spire-in-a-box.troydai.cc/wl/ns/bob/prober"
-
-images:
-  beacon: troydai/grpcbeacon:v0.8.4
-  envoy: envoyproxy/envoy:v1.25.1
