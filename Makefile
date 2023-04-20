@@ -6,7 +6,6 @@ SPIRE_NAMESPACE=spire
 cluster-up: cluster/kind-config.yaml
 	@ kind create cluster --name ${CLUSTER_NAME} --config cluster/kind-config.yaml
 	@ helm install -g ./charts/prerequisites
-	@ ./scripts/entry/create.sh
 
 cluster-down:
 	kind delete cluster --name ${CLUSTER_NAME}
@@ -48,7 +47,8 @@ prober-log-proxy:
 		xargs kubectl logs -nalice -f -c envoy
 
 spire-up:
-	@ helm install -g -n ${SPIRE_NAMESPACE} --create-namespace ./charts/spire
+	@ helm install -g -n ${SPIRE_NAMESPACE} --wait --create-namespace ./charts/spire
+	@ ./scrtips/entry/create.sh
 
 spire-down:
 	@ helm list -n ${SPIRE_NAMESPACE} -ojson | jq -r '.[] | .name' | xargs helm uninstall -n ${SPIRE_NAMESPACE} --wait
