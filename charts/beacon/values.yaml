@@ -6,9 +6,9 @@ images:
   envoy: envoyproxy/envoy:v1.25.1
 
 service:
-  envoyPort: 9090
-  envoyPortUnauth: 9091
-  beaconPort: 8080
+  localPort: 8080
+  securePort: 9090
+  unsecurePort: 9091
 
 spiffe:
   trustDomain: spire-in-a-box.troydai.cc

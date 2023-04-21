@@ -2,5 +2,5 @@ apiVersion: v2
 name: beacon
 description: A Helm chart for Beacon
 type: application
-version: 0.3.0
+version: 0.4.0
 appVersion: "1.16.0"

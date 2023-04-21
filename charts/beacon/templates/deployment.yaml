@@ -17,12 +17,13 @@ spec:
       containers:
         - name: beacon
           image: {{ .Values.images.beacon }}
+          env:
+            - name: FLOCKNAME
+              value: {{ .Release.Name }}
         - name: toolbox
           image: {{ .Values.images.toolbox }}
         - name: envoy
           image: {{ .Values.images.envoy }}
-          ports:
-            - containerPort: {{ .Values.service.envoyPort }}
           volumeMounts:
             - name: envoy-conifg
               mountPath: /etc/envoy
