@@ -15,14 +15,14 @@ spec:
     spec:
       serviceAccountName: beacon-sa
       containers:
+        - name: toolbox
+          image: {{ .Values.images.toolbox }}
         - name: beacon
           image: {{ .Values.images.beacon }}
           volumeMounts:
             - name: beacon-config
               mountPath: /etc/beacon-svc
               readOnly: true
-        - name: toolbox
-          image: {{ .Values.images.toolbox }}
         - name: envoy
           image: {{ .Values.images.envoy }}
           volumeMounts:
