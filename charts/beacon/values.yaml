@@ -1,7 +1,7 @@
 clusterName: kind-cluster
 
 beacon:
-  name: red
+  name: unknown
 
 images:
   beacon: ghcr.io/troydai/grpcbeacon:v0.16.0
@@ -18,5 +18,4 @@ spiffe:
 
 authorization:
   allowedExact:
-    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/prober-alice/prober"
-    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/prober-bob/prober"
+
