@@ -13,10 +13,10 @@ data:
 
     static_resources:
       listeners:
-      - name: listener_0
+      - name: local
         address:
           socket_address:
-            address: 0.0.0.0
+            address: 127.0.0.1
             port_value: 7000
         filter_chains:
         - filters:
@@ -39,12 +39,12 @@ data:
                   domains: ["*"]
                   routes:
                   - match:
-                      prefix: "/grpcbeacon.Beacon"
+                      prefix: "/Beacon"
                       grpc: {}
                     route:
-                      cluster: beacon-service
+                      cluster: beacon-red
       clusters:
-      - name: beacon-service
+      - name: beacon-red
         type: STRICT_DNS
         dns_lookup_family: V4_ONLY
         http2_protocol_options: {}
@@ -55,8 +55,8 @@ data:
             - endpoint:
                 address:
                   socket_address:
-                    address: {{ .Values.service.beaconServiceName }}.{{ .Values.service.beaconServiceNamespace }}.svc.cluster.local
-                    port_value: {{ .Values.service.beaconPort }}
+                    address: {{ .Values.upstream.red.addr }}
+                    port_value: {{ .Values.upstream.red.port }}
         transport_socket:
           name: envoy.transport_sockets.tls
           typed_config:
@@ -74,7 +74,7 @@ data:
               combined_validation_context:
                 default_validation_context:
                   match_subject_alt_names:
-                    exact: "spiffe://{{ .Values.spiffe.trustDomain }}/wl/beacon"
+                    exact: "spiffe://{{ .Values.spiffe.trustDomain }}/wl/ns/beacon-red/beacon"
                 validation_context_sds_secret_config:
                   name: "spiffe://{{ .Values.spiffe.trustDomain }}"
                   sds_config:

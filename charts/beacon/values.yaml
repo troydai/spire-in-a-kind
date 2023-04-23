@@ -1,8 +1,11 @@
 clusterName: kind-cluster
 
+beacon:
+  name: red
+
 images:
-  beacon: ghcr.io/troydai/grpcbeacon:v0.13.0
-  toolbox: ghcr.io/troydai/beacon-toolbox:v0.13.0
+  beacon: ghcr.io/troydai/grpcbeacon:v0.16.0
+  toolbox: ghcr.io/troydai/beacon-toolbox:v0.16.0
   envoy: envoyproxy/envoy:v1.25.1
 
 service:
@@ -12,9 +15,8 @@ service:
 
 spiffe:
   trustDomain: spire-in-a-box.troydai.cc
-  idPath: /wl/beacon
 
 authorization:
   allowedExact:
-    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/alice/prober"
-    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/bob/prober"
+    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/prober-alice/prober"
+    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/prober-bob/prober"

@@ -4,6 +4,11 @@ metadata:
   name: beacon-configmap
   namespace: {{ .Release.Namespace }}
 data:
+  beacon-config: |
+    name = {{ quote .Values.beacon.name }}
+    address = "127.0.0.1"
+    port = {{ .Values.service.localPort }}
+
   envoy-config: |
     node:
       id: default
@@ -43,7 +48,7 @@ data:
                           domains: ["*"]
                           routes:
                             - match:
-                                prefix: "/grpcbeacon.Beacon"
+                                prefix: "/Beacon"
                                 grpc: {}
                               route:
                                 cluster: local
@@ -79,7 +84,7 @@ data:
                           domains: ["*"]
                           routes:
                             - match:
-                                prefix: "/grpcbeacon.Beacon"
+                                prefix: "/Beacon"
                                 grpc: {}
                               route:
                                 cluster: local
@@ -89,7 +94,7 @@ data:
                   "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
                   common_tls_context:
                     tls_certificate_sds_secret_configs:
-                      - name: "spiffe://{{ .Values.spiffe.trustDomain }}{{ .Values.spiffe.idPath }}"
+                      - name: "spiffe://{{ .Values.spiffe.trustDomain }}/wl/ns/{{ .Release.Namespace }}/beacon"
                         sds_config:
                           api_config_source:
                             api_type: gRPC
