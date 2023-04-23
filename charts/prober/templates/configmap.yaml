@@ -40,11 +40,19 @@ data:
                   routes:
                   - match:
                       prefix: "/Beacon"
+                      headers:
+                      - name: "color"
+                        exact_match: "blue"
+                    route:
+                      cluster: beacon-blue
+                  - match:
+                      prefix: "/Beacon"
                       grpc: {}
                     route:
                       cluster: beacon-red
       clusters:
-      - name: beacon-red
+      {{- range .Values.upstream}}
+      - name: {{ .name }}
         type: STRICT_DNS
         dns_lookup_family: V4_ONLY
         http2_protocol_options: {}
@@ -55,15 +63,15 @@ data:
             - endpoint:
                 address:
                   socket_address:
-                    address: {{ .Values.upstream.red.addr }}
-                    port_value: {{ .Values.upstream.red.port }}
+                    address: {{ .addr }}
+                    port_value: {{ .port }}
         transport_socket:
           name: envoy.transport_sockets.tls
           typed_config:
             "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
             common_tls_context:
               tls_certificate_sds_secret_configs:
-                - name: "spiffe://{{ .Values.spiffe.trustDomain }}/wl/ns/{{ .Release.Namespace }}/prober"
+                - name: "spiffe://spire-in-a-box.troydai.cc/wl/ns/{{ $.Release.Namespace }}/prober"
                   sds_config:
                     api_config_source:
                       api_type: GRPC
@@ -74,9 +82,9 @@ data:
               combined_validation_context:
                 default_validation_context:
                   match_subject_alt_names:
-                    exact: "spiffe://{{ .Values.spiffe.trustDomain }}/wl/ns/beacon-red/beacon"
+                    exact: {{ quote .spiffeID }}
                 validation_context_sds_secret_config:
-                  name: "spiffe://{{ .Values.spiffe.trustDomain }}"
+                  name: "spiffe://{{ $.Values.spiffe.trustDomain }}"
                   sds_config:
                     api_config_source:
                       api_type: GRPC
@@ -87,6 +95,7 @@ data:
               tls_params:
                 ecdh_curves:
                   - X25519:P-256:P-521:P-384
+      {{- end }}
       - name: spire_agent
         connect_timeout: 0.25s
         http2_protocol_options: {}

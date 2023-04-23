@@ -24,7 +24,7 @@ done
 
 for name in alice bob charlie; do
     ns=prober-$name
-	helm install -n $ns --create-namespace -g charts/prober
+	helm install -n $ns --create-namespace -g charts/prober --values workloads/prober/$name/values.yaml
 
     kubectl exec -n spire -c spire-server deployment/spire-server-deployment -- /opt/spire/bin/spire-server \
         entry create \

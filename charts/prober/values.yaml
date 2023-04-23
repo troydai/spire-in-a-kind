@@ -9,9 +9,11 @@ spiffe:
   trustDomain: spire-in-a-box.troydai.cc
 
 upstream:
-  red:
+  - name: beacon-red
     addr: "beacon-service.beacon-red.svc.cluster.local"
     port: 9090
-  blue:
+    spiffeID: "spiffe://spire-in-a-box.troydai.cc/wl/ns/beacon-red/beacon"
+  - name: beacon-blue
     addr: "beacon-service.beacon-blue.svc.cluster.local"
     port: 9090
+    spiffeID: "spiffe://spire-in-a-box.troydai.cc/wl/ns/beacon-blue/beacon"

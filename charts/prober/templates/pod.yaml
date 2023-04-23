@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: prober
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
 spec:
   serviceAccountName: prober-sa
