@@ -1,7 +1,7 @@
-replicaCount: 1
+prober:
+  name: unknown
 
 images:
-  prober: ghcr.io/troydai/grpcprober:v0.16.0
   toolbox: ghcr.io/troydai/beacon-toolbox:v0.16.0
   envoy: envoyproxy/envoy:v1.25.1
 
@@ -9,9 +9,11 @@ spiffe:
   trustDomain: spire-in-a-box.troydai.cc
 
 upstream:
-  red:
+  - name: beacon-red
     addr: "beacon-service.beacon-red.svc.cluster.local"
     port: 9090
-  blue:
+    spiffeID: "spiffe://spire-in-a-box.troydai.cc/wl/ns/beacon-red/beacon"
+  - name: beacon-blue
     addr: "beacon-service.beacon-blue.svc.cluster.local"
     port: 9090
+    spiffeID: "spiffe://spire-in-a-box.troydai.cc/wl/ns/beacon-blue/beacon"

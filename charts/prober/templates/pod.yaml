@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceAccountName: prober-sa
+  containers:
+    - name: toolbox
+      image: {{ .Values.images.toolbox }}
+    - name: envoy
+      image: {{ .Values.images.envoy }}
+      volumeMounts:
+        - name: envoy-config
+          mountPath: /etc/envoy
+          readOnly: true
+        - name: spiffe-workload-api
+          mountPath: /opt/spire/sockets
+          readOnly: true
+  volumes:
+    - name: envoy-config
+      configMap:
+        name: prober-config
+        items:
+          - key: envoy-config
+            path: envoy.yaml
+    - name: spiffe-workload-api
+      csi:
+        driver: "csi.spiffe.io"
+        readOnly: true
