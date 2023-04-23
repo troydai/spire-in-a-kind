@@ -1,14 +1,17 @@
 replicaCount: 1
 
 images:
-  prober: ghcr.io/troydai/grpcprober:v0.13.0
-  toolbox: ghcr.io/troydai/beacon-toolbox:v0.13.0
+  prober: ghcr.io/troydai/grpcprober:v0.16.0
+  toolbox: ghcr.io/troydai/beacon-toolbox:v0.16.0
   envoy: envoyproxy/envoy:v1.25.1
 
 spiffe:
   trustDomain: spire-in-a-box.troydai.cc
 
-service:
-  beaconServiceName: beacon-service
-  beaconServiceNamespace: beacon
-  beaconPort: 9090
+upstream:
+  red:
+    addr: "beacon-service.beacon-red.svc.cluster.local"
+    port: 9090
+  blue:
+    addr: "beacon-service.beacon-blue.svc.cluster.local"
+    port: 9090
