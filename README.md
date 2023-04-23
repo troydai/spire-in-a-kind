@@ -37,7 +37,6 @@ The sandbox is built on a kind cluster in a local docker environment. Helm insta
 
 The sandbox comprises two major parts: the spire server cluster and the demonstrating workloads.
 
-
 ### SPIRE Server
 
 The first one is a templated SPIFFE/SPIRE server setup. It includes:
@@ -47,10 +46,9 @@ The first one is a templated SPIFFE/SPIRE server setup. It includes:
 - A spire server deployment. The spire server is configured by a config file mounted from a config map. The root X.509 certificate and privates are also mounted from separated config maps and secrets. (More on how to regenerate the root CA later). The server is exposed through a Kubernetes service on the 8081 port.
 - A pair of daemon sets that install SPIFFE CSI driver and spire agents on all the nodes. The spire agent is also configured through the config file mounted from the config map.
 
-
 ### Demonstrating workloads
 
-A pair of gRPC servers and clients are set up for demonstration purposes. Their implementation is at https://github.com/troydai/grpcbeacon.
+A pair of gRPC servers and clients are set up for demonstration purposes. Their implementation is at [grpcbeacon](https://github.com/troydai/grpcbeacon).
 
 The workloads are set up as follows:
 
