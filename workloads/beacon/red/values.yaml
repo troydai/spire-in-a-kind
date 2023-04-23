@@ -1,0 +1,7 @@
+beacon:
+  name: red
+
+authorization:
+  allowedExact:
+    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/prober-alice/prober"
+    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/prober-bob/prober"

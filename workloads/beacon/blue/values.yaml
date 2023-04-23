@@ -1,0 +1,6 @@
+beacon:
+  name: blue
+
+authorization:
+  allowedExact:
+    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/prober-charlie/prober"

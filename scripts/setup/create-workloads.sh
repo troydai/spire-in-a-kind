@@ -12,7 +12,7 @@ kubectl exec -n spire -c spire-server deployment/spire-server-deployment -- /opt
 
 for name in red blue; do
     ns=beacon-$name
-    helm install -n $ns --create-namespace -g charts/beacon --set beacon.name=$name
+    helm install -n $ns --create-namespace -g charts/beacon --set beacon.name=$name --values workloads/beacon/$name/values.yaml
 
     kubectl exec -n spire -c spire-server deployment/spire-server-deployment -- /opt/spire/bin/spire-server \
         entry create \
