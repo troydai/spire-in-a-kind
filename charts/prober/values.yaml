@@ -1,7 +1,7 @@
-replicaCount: 1
+prober:
+  name: unknown
 
 images:
-  prober: ghcr.io/troydai/grpcprober:v0.16.0
   toolbox: ghcr.io/troydai/beacon-toolbox:v0.16.0
   envoy: envoyproxy/envoy:v1.25.1
 
