@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Delete resources first 
+WORKDIR=$(dirname "$0")
+$WORKDIR/delete-workloads.sh
+
+# Create resources
 TRUST_DOMAIN=spire-in-a-box.troydai.cc
 CLUSTER=kind-cluster
 
