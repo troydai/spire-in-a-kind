@@ -1,0 +1,7 @@
+beacon:
+  name: red
+
+authorization:
+  allowedExact:
+    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/caller-alice/toolbox"
+    - "spiffe://spire-in-a-box.troydai.cc/wl/ns/caller-bob/toolbox"

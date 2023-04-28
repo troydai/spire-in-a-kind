@@ -4,12 +4,12 @@ metadata:
   name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
 spec:
-  serviceAccountName: prober-sa
+  serviceAccountName: caller-sa
   containers:
     - name: toolbox
-      image: {{ .Values.images.toolbox }}
+      image: {{ .Values.pod.images.toolbox }}
     - name: envoy
-      image: {{ .Values.images.envoy }}
+      image: {{ .Values.pod.images.envoy }}
       volumeMounts:
         - name: envoy-config
           mountPath: /etc/envoy
@@ -20,7 +20,7 @@ spec:
   volumes:
     - name: envoy-config
       configMap:
-        name: prober-config
+        name: caller-config
         items:
           - key: envoy-config
             path: envoy.yaml

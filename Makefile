@@ -12,7 +12,6 @@ cluster-down:
 
 spire-up:
 	@ helm install -g -n ${SPIRE_NAMESPACE} --wait --create-namespace ./charts/spire
-	@ ./scripts/entry/create.sh
 
 spire-down:
 	@ helm list -n ${SPIRE_NAMESPACE} -ojson | jq -r '.[] | .name' | xargs helm uninstall -n ${SPIRE_NAMESPACE} --wait
