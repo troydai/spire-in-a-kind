@@ -1,0 +1,19 @@
+name: unknown
+
+pod:
+  images:
+    toolbox: ghcr.io/troydai/beacon-toolbox:v0.21.0
+    envoy: envoyproxy/envoy:v1.25.1
+
+spiffe:
+  trustDomain: spire-in-a-box.troydai.cc
+
+upstream:
+  - name: httpbin-red
+    addr: "httpbin-service.httpbin-red.svc.cluster.local"
+    port: 9090
+    spiffeID: "spiffe://spire-in-a-box.troydai.cc/wl/ns/httpbin-red/httpbin"
+  - name: httpbin-blue
+    addr: "httpbin-service.httpbin-blue.svc.cluster.local"
+    port: 9090
+    spiffeID: "spiffe://spire-in-a-box.troydai.cc/wl/ns/httpbin-blue/httpbin"

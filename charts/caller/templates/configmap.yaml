@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: prober-config
+  name: caller-config
   namespace: {{ .Release.Namespace }}
 data:
   beacon_addr: "localhost:7000"
@@ -33,22 +33,29 @@ data:
                 typed_config:
                   "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
               route_config:
-                name: beacon-service
+                name: httpbin-service
                 virtual_hosts:
-                - name: beacon-service
+                - name: httpbin-blue
                   domains: ["*"]
                   routes:
                   - match:
+                      headers:
+                      - name: "color"
+                        exact_match: "blue"
                       prefix: "/"
                     route:
-                      cluster: beacon-red
+                      cluster: httpbin-blue
+                  - match:
+                      prefix: "/"
+                    route:
+                      cluster: httpbin-red
       clusters:
       {{- range .Values.upstream}}
       - name: {{ .name }}
         type: STRICT_DNS
         dns_lookup_family: V4_ONLY
         load_assignment:
-          cluster_name: beacon-service
+          cluster_name: {{ .name }}
           endpoints:
           - lb_endpoints:
             - endpoint:
@@ -62,7 +69,7 @@ data:
             "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
             common_tls_context:
               tls_certificate_sds_secret_configs:
-                - name: "spiffe://spire-in-a-box.troydai.cc/wl/ns/{{ $.Release.Namespace }}/prober"
+                - name: "spiffe://spire-in-a-box.troydai.cc/wl/ns/{{ $.Release.Namespace }}/toolbox"
                   sds_config:
                     api_config_source:
                       api_type: GRPC

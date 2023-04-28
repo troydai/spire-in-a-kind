@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: beacon-configmap
+  name: httpbin-configmap
   namespace: {{ .Release.Namespace }}
 data:
   envoy-config: |
@@ -87,7 +87,7 @@ data:
                   "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
                   common_tls_context:
                     tls_certificate_sds_secret_configs:
-                      - name: "spiffe://{{ .Values.spiffe.trustDomain }}/wl/ns/{{ .Release.Namespace }}/beacon"
+                      - name: "spiffe://{{ .Values.spiffe.trustDomain }}/wl/ns/{{ .Release.Namespace }}/httpbin"
                         sds_config:
                           api_config_source:
                             api_type: gRPC

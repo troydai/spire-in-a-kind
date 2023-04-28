@@ -1,15 +1,13 @@
 clusterName: kind-cluster
 
-beacon:
+deployment:
   name: unknown
-
-images:
-  httpbin: kennethreitz/httpbin:latest
-  toolbox: ghcr.io/troydai/beacon-toolbox:v0.21.0
-  envoy: envoyproxy/envoy:v1.25.1
+  images:
+    httpbin: kennethreitz/httpbin:latest
+    toolbox: ghcr.io/troydai/beacon-toolbox:v0.21.0
+    envoy: envoyproxy/envoy:v1.25.1
 
 service:
-  localPort: 8080
   securePort: 9090
   unsecurePort: 9091
 
@@ -18,4 +16,3 @@ spiffe:
 
 authorization:
   allowedExact:
-
