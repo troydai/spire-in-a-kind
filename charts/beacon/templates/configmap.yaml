@@ -4,11 +4,6 @@ metadata:
   name: beacon-configmap
   namespace: {{ .Release.Namespace }}
 data:
-  beacon-config: |
-    name = {{ quote .Values.beacon.name }}
-    address = "127.0.0.1"
-    port = {{ .Values.service.localPort }}
-
   envoy-config: |
     node:
       id: default
@@ -48,8 +43,7 @@ data:
                           domains: ["*"]
                           routes:
                             - match:
-                                prefix: "/Beacon"
-                                grpc: {}
+                                prefix: "/"
                               route:
                                 cluster: local
         - name: secure
@@ -84,8 +78,7 @@ data:
                           domains: ["*"]
                           routes:
                             - match:
-                                prefix: "/Beacon"
-                                grpc: {}
+                                prefix: "/"
                               route:
                                 cluster: local
               transport_socket:
@@ -124,7 +117,6 @@ data:
         - name: local
           type: STATIC
           dns_lookup_family: V4_ONLY
-          http2_protocol_options: {}
           load_assignment:
             cluster_name: local
             endpoints:
@@ -133,7 +125,7 @@ data:
                       address:
                         socket_address:
                           address: 127.0.0.1
-                          port_value: {{ .Values.service.localPort }}
+                          port_value: 80
         - name: spire_agent
           connect_timeout: 0.25s
           http2_protocol_options: {}

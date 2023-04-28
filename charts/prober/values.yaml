@@ -2,7 +2,7 @@ prober:
   name: unknown
 
 images:
-  toolbox: ghcr.io/troydai/beacon-toolbox:v0.19.0
+  toolbox: ghcr.io/troydai/beacon-toolbox:v0.21.0
   envoy: envoyproxy/envoy:v1.25.1
 
 spiffe:

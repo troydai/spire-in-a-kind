@@ -17,12 +17,10 @@ spec:
       containers:
         - name: toolbox
           image: {{ .Values.images.toolbox }}
-        - name: beacon
-          image: {{ .Values.images.beacon }}
-          volumeMounts:
-            - name: beacon-config
-              mountPath: /etc/beacon-svc
-              readOnly: true
+        - name: httpbin
+          image: {{ .Values.images.httpbin }}
+          ports:
+            - containerPort: 80
         - name: envoy
           image: {{ .Values.images.envoy }}
           volumeMounts:

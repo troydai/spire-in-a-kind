@@ -39,15 +39,7 @@ data:
                   domains: ["*"]
                   routes:
                   - match:
-                      prefix: "/Beacon"
-                      headers:
-                      - name: "color"
-                        exact_match: "blue"
-                    route:
-                      cluster: beacon-blue
-                  - match:
-                      prefix: "/Beacon"
-                      grpc: {}
+                      prefix: "/"
                     route:
                       cluster: beacon-red
       clusters:
@@ -55,7 +47,6 @@ data:
       - name: {{ .name }}
         type: STRICT_DNS
         dns_lookup_family: V4_ONLY
-        http2_protocol_options: {}
         load_assignment:
           cluster_name: beacon-service
           endpoints:
