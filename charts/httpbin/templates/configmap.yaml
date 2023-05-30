@@ -46,6 +46,7 @@ data:
                                 prefix: "/"
                               route:
                                 cluster: local
+                                timeout: 1s
         - name: secure
           address:
             socket_address:
@@ -81,6 +82,7 @@ data:
                                 prefix: "/"
                               route:
                                 cluster: local
+                                timeout: 1s
               transport_socket:
                 name: envoy.transport_sockets.tls
                 typed_config:
